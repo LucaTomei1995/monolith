@@ -94,7 +94,7 @@ export default class UploadFile extends React.Component {
 
   render() {
     const title = this.props.type === 'mapping' ?
-      <div>
+      <div >
         <p>Click or Drag Mapping here</p>
         <p>or</p>
         <p>Create a new Mapping through form below</p>
