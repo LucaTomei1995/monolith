@@ -44,7 +44,7 @@ class MyDrawer extends React.Component {
     };
 
     callback = (key) =>{
-      if(key == "1"){
+      if(key === "1"){
         console.log("Aggiungi un Mapping");
       }else{
         console.log("Creane uno nuovo");

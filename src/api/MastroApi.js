@@ -540,6 +540,46 @@ export function getMappingView(name, version, mapping, viewID, callback) {
     });
 }
 
+/*MIA*/
+export function postSQLEx(query, version, mapping, db,callback) {
+    if (fakeCalls) return callback(fakeData.queryCatalog)       
+    const url = localStorage.getItem('mastroUrl') + '/owlOntology/version/mapping/' + mapping + '/views/tableView';
+    const method = 'POST'
+    const encodedVersion = version//encodeURIComponent(version)
+    let json = {"queryCode": query , "dbName":db}
+    axios({
+        url: url,
+        method: method,
+        params: { version: encodedVersion },
+        data: json,
+        headers: JSON.parse(localStorage.getItem('headers')),
+    }).then(function (response) {
+        callback(response.data)
+    }).catch(function (err) {
+        manageError(err)
+    });
+}
+
+export function getTableResult(version, mapping, db,callback) {
+    if (fakeCalls) return callback(fakeData.queryCatalog)
+    const url = localStorage.getItem('mastroUrl') + '/owlOntology/version/mapping/' + mapping + '/views/tables';
+    const method = 'POST'
+    const encodedVersion = version//encodeURIComponent(version)
+    let json = {"queryCode": null , "dbName":db}
+    axios({
+        url: url,
+        method: method,
+        params: { version: encodedVersion },
+        data: json,
+        headers: JSON.parse(localStorage.getItem('headers')),
+    }).then(function (response) {
+        callback(response.data)
+    }).catch(function (err) {
+        manageError(err)
+    });
+}
+
+
 export function putMappingView(name, version, mapping, viewID, sqlView, callback) {
     if (fakeCalls) return callback(fakeData.sqlView)
     const url = localStorage.getItem('mastroUrl') + '/owlOntology/' + name + '/version/mapping/' + mapping + '/view/' + viewID

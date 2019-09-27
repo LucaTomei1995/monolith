@@ -1,0 +1,6 @@
+SELECT	
+  $b $title
+WHERE {
+  $b a <http://www.obdasystems.com/books/Book> .
+  $b <http://www.obdasystems.com/books/title> $title
+}

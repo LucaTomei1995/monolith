@@ -5,15 +5,22 @@ import SyntaxHighlighter from 'react-syntax-highlighter';
 import { darcula } from 'react-syntax-highlighter/dist/styles/hljs';
 import sqlFormatter from 'sql-formatter'
 import Dependencies from './Dependencies'
-import { getMappingView, deleteMappingView } from '../api/MastroApi';
+import { getMappingView, deleteMappingView, postSQLEx } from '../api/MastroApi';
 import ListMapItem from './ListMapItem'
+
+
+function parseQuery(query){
+    return query.replace("\n", "£");
+}
+
 
 
 export default class SQLViewsPage extends React.Component {
 
     state = {
         data: null,
-        loading: true
+        loading: true,
+        executing:false // MIO
     }
 
     componentDidMount() {
@@ -42,8 +49,10 @@ export default class SQLViewsPage extends React.Component {
 
     render() {
         const data = this.state.data
+
         if (this.state.data === null || this.state.loading) return <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 36 }}> <Spin size='large' /></div>
 
+        
         const first = [
             {
                 mapKey: "Description",
@@ -75,6 +84,17 @@ export default class SQLViewsPage extends React.Component {
                     }>
                         delete
                     </span>
+
+                    /*<span onClick={
+                        () => postSQLEx(
+                            parseQuery(data.sqlView.sqlViewCode),
+                            this.props.ontology.version,
+                            this.props.mappingID,
+                            this.props.ontology.name,
+                            this.props.delete)
+                    }>
+                        RUNNNNNNNNNN
+                    </span>*/
                 ]}>
                 <ListMapItem data={first} />
             </Card>,
@@ -85,7 +105,12 @@ export default class SQLViewsPage extends React.Component {
 
         ]
 
+        /*for(var i = 0; i < data.length; i++){
+            console.log(data[i]);
+        }*/
 
+       /* alert(data.sqlView.sqlViewCode);*/
+        
         return (
             <div style={{ paddingTop: 12 }}>
                 <div style={{ textAlign: 'center' }}>

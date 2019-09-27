@@ -1,0 +1,6 @@
+construct {
+	$b <http://pred/dp/title> <http://uilo> 
+}
+WHERE {
+  $b a <http://www.obdasystems.com/books/Book> 
+}

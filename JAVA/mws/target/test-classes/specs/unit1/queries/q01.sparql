@@ -1,0 +1,4 @@
+select $X
+where {
+$X a <http://www.obdasystems.com/unit1#C>
+}

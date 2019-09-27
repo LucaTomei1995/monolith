@@ -137,6 +137,8 @@ export default class MastroResultsTable extends React.Component {
                     this.stopPolling.bind(this))
             }
             else
+                
+        /*alert("utils");*/
                 getQueryResults(
                     this.props.ontology.name,
                     this.props.ontology.version,

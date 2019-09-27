@@ -4,9 +4,13 @@ import SearchList from './FastSearchList';
 import SQLViewsPage from './SQLViewsPage';
 import AddSQLView from './AddSQLView';
 
+
 const {
     Content,
 } = Layout;
+
+
+
 
 export default class SQLViewsPane extends React.Component {
     state = {
@@ -21,6 +25,8 @@ export default class SQLViewsPane extends React.Component {
             visible: !this.state.visible,
         });
     }
+
+
 
     toggleEdit = (sqlView) => {
         this.setState({
