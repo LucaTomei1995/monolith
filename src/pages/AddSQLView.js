@@ -2,15 +2,18 @@ import React from 'react';
 import { Table , Form, Button, message } from 'antd';
 import TextArea from 'antd/lib/input/TextArea';
 import { postMappingViews, putMappingView, postSQLEx, getTableResult } from '../api/MastroApi';
-import ReactTextareaAutocomplete from "@webscopeio/react-textarea-autocomplete";
-
-
-
-import "@webscopeio/react-textarea-autocomplete/style.css";
+import codemirror from 'codemirror';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/mode/sql/sql'; 
+import fromTextArea from'codemirror/src/edit/fromTextArea';
+import 'codemirror/addon/hint/sql-hint';
+import 'codemirror/addon/hint/show-hint.css';
+import 'codemirror/addon/hint/show-hint';
 
 
 class Mine extends React.Component {
     componentDidMount() {
+        document.getElementsByName("textarea")[0].setAttribute("id", "textarea");
         if (this.props.sqlView) {
             const values = this.props.sqlView
             this.props.form.setFieldsValue({
@@ -19,8 +22,23 @@ class Mine extends React.Component {
                 code: values.sqlViewCode
             })
             getTableResult(this.props.ontology.version, this.props.mappingID, this.props.ontology.name, this.getAutoComplete);
-                
-        }
+            var CodeMirror = codemirror.fromTextArea(document.getElementById("textarea") , {
+                mode: 'sql',
+                lineNumbers: true,
+                extraKeys: {
+                    "Ctrl-Space": "autocomplete"
+                },
+                hintOptions: {
+                    tables:[
+                        {text: "const" , displayText: "const diomaiale"},
+                    ]
+                    ,
+                }
+            });
+            var mirrorvalue = this.props.sqlView.sqlViewCode ? this.props.sqlView.sqlViewCode : '';
+            CodeMirror.setValue(mirrorvalue);
+            }
+
     }
 
     constructor(props) {
@@ -32,15 +50,10 @@ class Mine extends React.Component {
             render: true,
             dataSource: [], 
             columns: [],
-            tables: [],
-            textVal:''
+            tables: []
         };
       }
 
-
-    handleTextArea = (evt) =>{
-        this.setState({ textVal: evt.target.value.substr(0) });
-    }
 
     autocompleteConstructor = () =>{
         var tab = this.state.tables;
@@ -129,8 +142,9 @@ class Mine extends React.Component {
     }
 
     handleClick = (e) => {
+        // this.state.textVal = CodeMirror.getValue();
         postSQLEx(
-                this.state.textVal,
+                document.querySelector('.CodeMirror').CodeMirror.getValue(),//this.state.textVal,
                 this.props.ontology.version,
                 this.props.mappingID,
                 this.props.ontology.name,
@@ -143,7 +157,6 @@ class Mine extends React.Component {
             }
         })
     }
-
 
 
 
@@ -193,29 +206,7 @@ class Mine extends React.Component {
                             required: true, message: 'Please select sql view name',
                         }],
                     })(
-                    <ReactTextareaAutocomplete
-                          className="ant-input"
-                          value={this.state.textVal} autofocus="autofocus" onChange={this.handleTextArea}
-                          loadingComponent={() => <span>Loading</span>}
-                          autosize={{ minRows: 8 }}
-                          style={{
-                                minRows: 8,
-                                height: '178px',
-                                minHeight: '178px'
-                              }}
-                          
-                          trigger={{
-                            ":": {
-
-                              dataProvider: token => {
-                                return this.autocompleteConstructor();
-                              },
-                              component: Item,
-                              output: (item, trigger) => item.name
-                            }
-                          }}
-                        />
-                        /*<TextArea autosize={{ minRows: 8 }} value={this.state.testSqlQuery} onChange={(e) => this.setState({testSqlQuery: e.target.value , render:true})}/>*/
+                        <TextArea name = "textarea" autosize={{ minRows: 8 }} />
                     )}
                 </Form.Item>
                 <Form.Item label='Description'>
@@ -238,111 +229,6 @@ class Mine extends React.Component {
                 </div> 
                 : null
                 }
-            </Form>
-        )
-    }
-}
-
-
-
-
-class AddSQLViewForm extends React.Component {
-    componentDidMount() {
-        if (this.props.sqlView) {
-            const values = this.props.sqlView
-            this.props.form.setFieldsValue({
-                name: values.sqlViewID,
-                description: values.sqlViewDescription,
-                code: values.sqlViewCode
-            })
-        }
-    }
-
-    handleSubmit = (e) => {
-        e.preventDefault();
-        this.props.form.validateFieldsAndScroll((err, values) => {
-            if (!err) {
-                const sqlView = {
-                    sqlViewID: values.name,
-                    sqlViewDescription: values.description,
-                    sqlViewCode: values.code
-                }
-                if (this.props.sqlView.sqlViewID)
-                    putMappingView(
-                        this.props.ontology.name,
-                        this.props.ontology.version,
-                        this.props.mappingID,
-                        this.props.sqlView.sqlViewID,
-                        sqlView,
-                        this.props.success);
-                else
-                    postMappingViews(
-                        this.props.ontology.name,
-                        this.props.ontology.version,
-                        this.props.mappingID,
-                        sqlView,
-                        this.props.success);
-            }
-        })
-    }
-
-    render() {
-        const { getFieldDecorator } = this.props.form;
-        const formItemLayout = {
-            labelCol: {
-                xs: { span: 24 },
-                sm: { span: 8 },
-            },
-            wrapperCol: {
-                xs: { span: 24 },
-                sm: { span: 16 },
-            },
-        };
-        const tailFormItemLayout = {
-            wrapperCol: {
-                xs: {
-                    span: 24,
-                    offset: 0,
-                },
-                sm: {
-                    span: 16,
-                    offset: 8,
-                },
-            },
-        };
-
-        return (
-            <Form {...formItemLayout} onSubmit={this.handleSubmit} style={{ maxWidth: 800 }}>
-                <Form.Item label='Name'>
-                    {getFieldDecorator('name', {
-                        rules: [{
-                            required: true, message: 'Please select sql view name',
-                        }],
-                    })(
-                        <TextArea autosize={{ minRows: 1 }} />
-                    )}
-                </Form.Item>
-                <Form.Item label='SQL Code'>
-                    {getFieldDecorator('code', {
-                        rules: [{
-                            required: true, message: 'Please select sql view name',
-                        }],
-                    })(
-                        <TextArea autosize={{ minRows: 8 }} />
-                    )}
-                </Form.Item>
-                <Form.Item label='Description'>
-                    {getFieldDecorator('description', {
-                        rules: [{
-                            required: false,
-                        }],
-                    })(
-                        <TextArea autosize={{ minRows: 1 }} />
-                    )}
-                </Form.Item>
-                <Form.Item {...tailFormItemLayout} style={{ marginTop: 24 }}>
-                    <Button type="primary" htmlType="submit">Save</Button>
-                </Form.Item>
             </Form>
         )
     }
