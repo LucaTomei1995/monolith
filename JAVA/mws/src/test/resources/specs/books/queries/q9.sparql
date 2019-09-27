@@ -1,5 +1,0 @@
-SELECT	
-  $b 
-WHERE {
-  $b a <http://www.obdasystems.com/books/Book> 
-}
