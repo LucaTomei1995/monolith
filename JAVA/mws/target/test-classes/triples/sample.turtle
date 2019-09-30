@@ -1,0 +1,25 @@
+PREFIX tdb:     <http://jena.hpl.hp.com/2008/tdb#>
+PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX ja:      <http://jena.hpl.hp.com/2005/11/Assembler#>
+
+tdb:Dataset a rdfs:Class .
+tdb:GraphTDB a rdfs:Class .
+
+tdb:DatasetTDB  rdfs:subClassOf  ja:RDFDataset .
+tdb:GraphTDB    rdfs:subClassOf  ja:Model .
+
+tdb:location a rdf:Property ;
+   # domain is tdb:Dataset or tdb:GraphTDB
+   # The range is simple literal
+   .
+
+tdb:unionDefaultGraph a rdf:Property ;
+   rdfs:domain tdb:Dataset ;
+   # The range is xsd:boolean
+   .
+
+tdb:graphName a rdf:Property ;
+   rdfs:domain tdb:GraphTDB ;
+   # range is a URI
+   .
