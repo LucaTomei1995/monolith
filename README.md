@@ -58,4 +58,4 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 
 ## Tirocinio
 
-Per aggiungere codemirror fare :"npm install codemirror --save".
+To add Codemirror editor instance, install it with: "npm install react-codemirror --save"

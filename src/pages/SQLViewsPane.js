@@ -73,7 +73,7 @@ export default class SQLViewsPane extends React.Component {
                 <Drawer title='Add SQL View'
                     visible={this.state.visibleEdit}
                     onClose={this.toggleEdit}
-                    width={'50vw'}>
+                    width={'60vw'}>
                     {this.state.drawer}
                 </Drawer>
                 {/* <Header style={{ backgroundColor: 'transparent', display: 'flex', justifyContent: 'center', lineHeight: 1.5, height: 32 }}>
