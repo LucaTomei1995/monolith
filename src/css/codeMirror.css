@@ -2,22 +2,30 @@
   z-index: 1000 !important;
 }
 
-.CodeMirror-scroll{
-	padding: 0 !important;
+.CodeMirror-scroll {
+  padding: 0 !important;
 }
 
-.cm-keyword{
-	color: rgb(244, 138, 60) !important;
+.cm-keyword {
+  color: rgb(244, 138, 60) !important;
 }
-.CodeMirror-gutters{
-	border-right: 1px solid #ddd;
-	white-space: nowrap;
+.CodeMirror-gutters {
+  border-right: 1px solid #ddd;
+  white-space: nowrap;
 }
 
 .CodeMirror-linenumber {
-    padding: 0 3px 0 5px;
-    min-width: 20px;
-    text-align: center;
-    color: #999;
-    white-space: nowrap;
+  padding: 0 3px 0 5px;
+  min-width: 20px;
+  text-align: center;
+  color: #999;
+  white-space: nowrap;
+}
+.CodeMirror {
+  line-height: 21px;
+  border-radius: 4px;
+}
+
+.CodeMirror-linenumbers {
+  background-color: var(--medium);
 }
