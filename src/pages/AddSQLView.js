@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table , Form, Button, message } from 'antd';
 import TextArea from 'antd/lib/input/TextArea';
-import { postMappingViews, putMappingView, postSQLEx, getTableResult } from '../api/MastroApi';
+import { postMappingViews, putMappingView, postSQLEx, getTableResult, getDatasources } from '../api/MastroApi';
 
 import 'codemirror/theme/material.css';
 import 'codemirror/lib/codemirror.css';
@@ -22,7 +22,7 @@ class CodeEditorField extends React.Component {
                 description: values.sqlViewDescription,
                 code: values.sqlViewCode
             })
-            getTableResult(this.props.ontology.version, this.props.mappingID, this.props.ontology.name, this.getAutoComplete);
+            getDatasources(this.setJdbDriverEntry)
             const codemirrorStyle =  document.querySelector('.CodeMirror-scroll');
             
             codemirrorStyle.classList.add('ant-input')
@@ -33,6 +33,19 @@ class CodeEditorField extends React.Component {
         }
     }
     
+    setJdbDriverEntry = (x)=>{
+        var jdbcDB = x[0]['id']
+        var jdbcDriver = x[0]['jdbcDriver']
+        var jdbcUrl = x[0]['jdbcUrl']
+        var jdbcUsername = x[0]['jdbcUsername']
+        var jdbcPassword = x[0]['jdbcPassword']
+        this.state.jdbcEntry['jdbcDriver']= jdbcDriver
+        this.state.jdbcEntry['jdbcUsername']= jdbcUsername
+        this.state.jdbcEntry['jdbcPassword']= jdbcPassword
+        this.state.jdbcEntry['jdbcDB']= jdbcDB
+        this.state.jdbcEntry['jdbcUrl']= jdbcUrl
+        getTableResult(this.props.ontology.version, this.props.mappingID, this.state.jdbcEntry, this.getAutoComplete);
+    }
     constructor(props) {
         super(props);
         this.state = {
@@ -42,10 +55,12 @@ class CodeEditorField extends React.Component {
             render: true,
             dataSource: [], 
             columns: [],
-            tables: []
+            tables: [],
+            jdbcEntry:[{jdbcDB:null, jdbcUrl:null,jdbcDriver:null, jdbcUsername:null, jdbcPassword:null}]
         };
     }
     getAutoComplete = (dbResult) =>{
+
         var tab = dbResult
         var numElements = tab['tables'].length;
         var retDict = [];
@@ -56,7 +71,7 @@ class CodeEditorField extends React.Component {
             retDict.push({ text: tableName, displayText:tableName});    // name:nometabella, 
             
             for(var j = 0; j < numAttributesInTable; j++){
-                retDict.push({ text: listAttributes[j],  displayText:"(Attributo di " + tableName + ")"});  // name:nometabella, 
+                retDict.push({ text: listAttributes[j],  displayText: listAttributes[j] + " - (Attribute of " + tableName + ")"});  // name:nometabella, 
             }
         }
 
@@ -68,6 +83,7 @@ class CodeEditorField extends React.Component {
    
     autoComplete = cm => {
         const codeMirror = this.refs['CodeMirror'].getCodeMirrorInstance();
+        console.log(this.state.tables)
         const hintOptions = {
             tables: this.state.tables,
             disableKeywords: true,
@@ -143,11 +159,12 @@ class CodeEditorField extends React.Component {
 
     handleClick = (e) => {
         // this.state.textVal = CodeMirror.getValue();
+
         postSQLEx(
                 document.querySelector('.CodeMirror').CodeMirror.getValue(),//this.state.textVal,
                 this.props.ontology.version,
                 this.props.mappingID,
-                this.props.ontology.name,
+                this.state.jdbcEntry,
                 this.test)
         
         this.props.form.validateFieldsAndScroll((err , values) => {

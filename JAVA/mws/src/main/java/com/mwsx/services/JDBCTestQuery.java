@@ -5,22 +5,28 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.sql.Statement;
+
+
+import com.mwsx.model.SQLQuery;
 
 
 
 public class JDBCTestQuery {	// PROVA CON MYSQL
-	private static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";// "org.postgresql.Driver"; 
-	private static final String DB_URL = "jdbc:mysql://localhost/";
-	private static final String username = "root";
-	private static final String password = "Fgil1995!";
+	private static SQLQuery query;
 	
-	public String getResults(String dbName,String query) {
+	public JDBCTestQuery(SQLQuery query) {
+		this.query = query;
+	}
+	public static SQLQuery getQuery() {
+		return query;
+	}
+	
+	public String getResults(String query) {
 		String resultString = "", columns_name = "";
 		try {
-			Class.forName(JDBC_DRIVER);
-			Connection conn = DriverManager.getConnection(DB_URL + dbName, "root", "Fgil1995!");
+			Class.forName(this.query.getJdbcDriver());
+			Connection conn = DriverManager.getConnection(this.query.getJdbcUrl() /*+ dbName*/, this.query.getJdbcUsername(), this.query.getJdbcPassword());
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
 			ResultSetMetaData rsmd = rs.getMetaData();
@@ -40,11 +46,13 @@ public class JDBCTestQuery {	// PROVA CON MYSQL
 		return resultString;
 	}
 	// object mapper
-	public String getTables(String dbName) {
+	public String getTables() {
 		String jsonRes = "{\"tables\":[";
+		
 		try {
-			Class.forName(JDBC_DRIVER);
-			Connection conn = DriverManager.getConnection(DB_URL + dbName, "root", "Fgil1995!");
+			
+			Class.forName(this.query.getJdbcDriver());
+			Connection conn = DriverManager.getConnection(this.query.getJdbcUrl() /*+ dbName*/, this.query.getJdbcUsername(), this.query.getJdbcPassword());
 			DatabaseMetaData dbmd = conn.getMetaData();
             String[] types = {"TABLE"};
             ResultSet rs = dbmd.getTables(null, null, "%", types);

@@ -11,7 +11,6 @@ import java.util.NoSuchElementException;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.JOptionPane;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -1104,9 +1103,9 @@ public class MwsxService {
 		String q = query.getQueryCode();
 		String dbName = query.getDbName().toLowerCase();
 		String queryStr = query.getQueryCode().toLowerCase();
-		JDBCTestQuery t = new JDBCTestQuery();
+		JDBCTestQuery t = new JDBCTestQuery(query);
 
-		String queryRes = t.getResults(dbName, queryStr);
+		String queryRes = t.getResults(queryStr);
 		if(queryRes == null)	System.err.println("Nessun Risultato dalla query");
 
 		return Response.ok().entity(queryRes).build();
@@ -1120,10 +1119,9 @@ public class MwsxService {
 	public Response getTables(
 			@Context HttpServletRequest request,
 			@Context HttpServletResponse response, @PathParam("ID") String ID,
-			SQLQuery query) { 
-		String dbName = query.getDbName().toLowerCase();
-		JDBCTestQuery t = new JDBCTestQuery();
-		String tableRes = t.getTables(dbName);
+			SQLQuery query) {
+		JDBCTestQuery t = new JDBCTestQuery(query);
+		String tableRes = t.getTables();
 		if(tableRes == null)	System.err.println("Nessun Risultato dalla getTables");
 		return Response.ok().entity(tableRes).build();
 	}
@@ -1341,9 +1339,8 @@ public class MwsxService {
 	@MwsxAvailable
 	public Response delete__owlOntology_name_version_query_ID(@Context HttpServletRequest request,
 			@Context HttpServletResponse response, @PathParam("name") String name, @QueryParam("version") String version,
-			@PathParam("ID") String ID
-
-	) { 
+			@PathParam("ID") String ID) 
+	{ 
 		if (version != null) version = version.replace("\"", "");
 		if (LOG_METHODS) logMethodInfo();
 		SPARQLQuery queryRet = null;
