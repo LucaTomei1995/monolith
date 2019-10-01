@@ -86,7 +86,6 @@ class MyDrawer extends React.Component {
     });
   };
   changeTab = activeKey => {
-    console.log(activeKey);
     this.setState({
       activeTab: activeKey
     });

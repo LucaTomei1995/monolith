@@ -71,8 +71,8 @@ class CodeEditorField extends React.Component {
       renderTestSqlQuery: "",
       render: true,
       dataSource: [],
-      columns: [],
-      tables: [],
+      sqlColumns: [],
+      sqlTables: [],
       jdbcEntry: [
         {
           jdbcDB: null,
@@ -140,14 +140,13 @@ class CodeEditorField extends React.Component {
     for (var k = 0; k < sqlList.length; k++)
       retDict.push({ text: sqlList[k], displayText: sqlList[k] });
 
-    this.setState({ tables: retDict });
+    this.setState({ sqlTables: retDict });
   };
 
   autoComplete = cm => {
     const codeMirror = this.refs["CodeMirror"].getCodeMirrorInstance();
-    console.log(this.state.tables);
     const hintOptions = {
-      tables: this.state.tables,
+      tables: this.state.sqlTables,
       disableKeywords: true,
       completeSingle: false,
       completeOnSingleClick: false
@@ -157,7 +156,7 @@ class CodeEditorField extends React.Component {
 
   test = queryResult => {
     this.setState({ dataSource: [] }); // Nuova tabella
-    this.setState({ columns: [] }); // Nuova tabella
+    this.setState({ sqlColumns: [] }); // Nuova tabella
     var tmp = queryResult.split("\n");
     var numResults = tmp.length;
     var numAttributi = function(queryResultSplitted) {
@@ -182,7 +181,7 @@ class CodeEditorField extends React.Component {
           dataIndex: qualiAttributi(tmp)[i]
         };
       }
-      this.setState({ columns: innerColumns });
+      this.setState({ sqlColumns: innerColumns });
       for (var k = 0; k < numResults; k++) {
         dataSource[k] = { key: k };
         if (k >= 1) {
@@ -283,6 +282,7 @@ class CodeEditorField extends React.Component {
       mode: "sql",
       tabSize: 2,
       readOnly: false,
+      cursorHeight: 0.85,
       extraKeys: {
         "Ctrl-Space": this.autoComplete
       }
@@ -332,7 +332,7 @@ class CodeEditorField extends React.Component {
           <div>
             <Table
               dataSource={this.state.dataSource}
-              columns={this.state.columns}
+              columns={this.state.sqlColumns}
             />
             ;
           </div>

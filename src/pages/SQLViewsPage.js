@@ -12,7 +12,7 @@ export default class SQLViewsPage extends React.Component {
   state = {
     data: null,
     loading: true,
-    executing: false // MIO
+    executing: false
   };
 
   componentDidMount() {
@@ -108,12 +108,6 @@ export default class SQLViewsPage extends React.Component {
       <Divider>{"Dependencies"}</Divider>,
       <Dependencies dependencies={data.mappingDependencies} />
     ];
-
-    /*for(var i = 0; i < data.length; i++){
-            console.log(data[i]);
-        }*/
-
-    /* alert(data.sqlView.sqlViewCode);*/
 
     return (
       <div style={{ paddingTop: 12 }}>
