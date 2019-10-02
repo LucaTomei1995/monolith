@@ -84,6 +84,12 @@ class MyDrawer extends React.Component {
       version: uploadedResponse.mappingInfo.mapping.mappingVersion,
       datasource: uploadedResponse.mappingInfo.mappingDBConnections[0].name
     });
+    if (uploadedResponse.success) {
+      this.setState({
+        visible: false
+      });
+      this.props.rerender();
+    }
   };
   changeTab = activeKey => {
     this.setState({
