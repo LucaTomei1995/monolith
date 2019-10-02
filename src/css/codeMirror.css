@@ -29,3 +29,9 @@
 .CodeMirror-linenumbers {
   background-color: var(--medium);
 }
+.CodeMirror-hint {
+  color: white !important;
+}
+.CodeMirror-hints {
+  background-color: var(--medium);
+}
