@@ -9,6 +9,13 @@
 .cm-keyword {
   color: rgb(244, 138, 60) !important;
 }
+
+.cm-comment{
+  color: aqua !important;
+}
+.cm-string{
+  color: greenyellow !important;
+}
 .CodeMirror-gutters {
   border-right: 1px solid #ddd;
   white-space: nowrap;
