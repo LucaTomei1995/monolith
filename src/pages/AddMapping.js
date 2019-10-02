@@ -223,7 +223,7 @@ class MyDrawer extends React.Component {
                   borderTop: "1px solid #e9e9e9",
                   padding: "10px 16px",
                   textAlign: "right",
-                  background: "var(--light)"
+                  color: "var(--medium)"
                 }}
               >
                 <Button onClick={this.onClose} style={{ marginRight: 8 }}>
