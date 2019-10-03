@@ -540,12 +540,12 @@ export function getMappingView(name, version, mapping, viewID, callback) {
     });
 }
 
-/*MIA*/
+
 export function postSQLEx(query, version, mapping, jdbcEntry ,callback) {
     if (fakeCalls) return callback(fakeData.queryCatalog)       
     const url = localStorage.getItem('mastroUrl') + '/owlOntology/version/mapping/' + mapping + '/views/tableView';
     const method = 'POST'
-    const encodedVersion = version//encodeURIComponent(version)
+    const encodedVersion = version
     let json = {"queryCode": query ,"dbName":jdbcEntry['jdbcDB']}
     axios({
         url: url,
@@ -564,7 +564,7 @@ export function getTableResult(version, mapping, jdbcEntry,callback) {
     if (fakeCalls) return callback(fakeData.queryCatalog)
     const url = localStorage.getItem('mastroUrl') + '/owlOntology/version/mapping/' + mapping + '/views/tables';
     const method = 'POST'
-    const encodedVersion = version//encodeURIComponent(version)
+    const encodedVersion = version
     let json = {"queryCode": null ,"dbName":jdbcEntry['jdbcDB']}
     axios({
         url: url,
