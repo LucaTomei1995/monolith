@@ -7,7 +7,6 @@ import { predicateTypes } from '../utils/utils';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { darcula } from 'react-syntax-highlighter/dist/styles/hljs';
 import sqlFormatter from 'sql-formatter'
-import TextArea from 'antd/lib/input/TextArea';
 import 'codemirror/theme/material.css';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/hint/sql-hint';
@@ -17,7 +16,6 @@ import '../css/codeMirror.css'
 import 'codemirror/addon/lint/lint';
 import 'codemirror/addon/lint/lint.css';
 
-import { getLine, lineNo } from "codemirror/src/line/utils_line";
 
 var CodeMirror = require('react-codemirror');
 
@@ -59,12 +57,12 @@ class AssertionForm extends React.Component {
         }
         var sqlList = ['FROM' , 'JOIN' , 'ON' ,
                         'SELECT', 'WHERE' , 'AND'];
-        for(var i = 0; i < sqlList.length; i++) retDict.push({text: sqlList[i], displayText: sqlList[i]});
+        for(var j = 0; j < sqlList.length; j++) retDict.push({text: sqlList[j], displayText: sqlList[j]});
         
         sqlList = ['>' , '>=' , '<' , '=<' , '=' , '<>' , 'IS NULL' , 'IS NOT NULL' , 'NOT_IN' , 'BETWEEN' , 'LIKE' , 'NOT_LIKE'];
         var sqlListText = ["GREATER THAN", "GREATER EQUAL THAN", "LESS THAN", "LESS EQUAL THAN", "EQUALS", "NOT EQUALS", "IS NULL", 
                             "IS NOT NULL", "NOT IN", "BETWEEN", "LIKE", "NOT LIKE",];
-        for(var i = 0; i < sqlList.length; i++) retDict.push({text: sqlList[i], displayText: sqlListText[i]});
+        for(var k = 0; k < sqlList.length; k++) retDict.push({text: sqlList[k], displayText: sqlListText[k]});
 
         this.setState({tables: retDict});
         this.setState({ mappingViews })
@@ -358,7 +356,7 @@ class AssertionForm extends React.Component {
         }
 
         var sqlList = ['ALTER', 'AND', 'AS', 'ASC', 'BETWEEN', 'BY', 'COUNT', 'CREATE', 'DELETE', 'DESC', 'DISTINCT', 'DROP', 'FROM', 'GROUP', 'HAVING', 'IN', 'INSERT', 'INTO', 'IS', 'JOIN', 'LIKE', 'NOT', 'ON', 'OR', 'ORDER', 'SELECT', 'SET', 'TABLE', 'UNION', 'UPDATE', 'VALUES', 'WHERE', 'LIMIT'];
-        for(var i = 0; i < sqlList.length; i++) retDict.push({text: sqlList[i], displayText: sqlList[i]});
+        for(var k = 0; k < sqlList.length; k++) retDict.push({text: sqlList[k], displayText: sqlList[k]});
         
         this.setState({tables: retDict});
     }
