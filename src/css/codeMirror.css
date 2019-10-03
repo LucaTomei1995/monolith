@@ -10,10 +10,10 @@
   color: rgb(244, 138, 60) !important;
 }
 
-.cm-comment{
+.cm-comment {
   color: aqua !important;
 }
-.cm-string{
+.cm-string {
   color: greenyellow !important;
 }
 .CodeMirror-gutters {
@@ -41,4 +41,80 @@
 }
 .CodeMirror-hints {
   background-color: var(--medium);
+}
+
+.CodeMirror-hint {
+  margin: 0;
+  padding: 0 4px;
+  border-radius: 2px;
+  white-space: pre;
+  cursor: pointer;
+  padding-left: 22px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.CodeMirror-hint:before {
+  position: absolute;
+  left: 2px;
+  bottom: 2px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+  height: 15px;
+  width: 15px;
+  line-height: 16px;
+  text-align: center;
+  color: white;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.CodeMirror-hint-table {
+  font-weight: bold;
+  color: black;
+}
+
+.CodeMirror-hint-table:before {
+  content: "T";
+  background: black;
+}
+
+.CodeMirror-hint-attribute {
+  font-weight: bold;
+  color: black;
+}
+
+.CodeMirror-hint-attribute:before {
+  content: "A";
+  background: black;
+}
+.CodeMirror-hint-defaultSql {
+  font-weight: bold;
+  color: black;
+}
+
+.CodeMirror-hint-defaultSql:before {
+  content: "S";
+  background: black;
+}
+
+.keyword.CodeMirror-hint {
+  font-weight: bold;
+  color: #ff21ff;
+}
+
+.keyword.CodeMirror-hint:before {
+  content: "F";
+  background: #ff21ff;
+}
+
+.builtin.CodeMirror-hint {
+  font-weight: bold;
+  color: #0000ff;
+}
+
+.builtin.CodeMirror-hint:before {
+  content: "K";
+  background: #0000ff;
 }

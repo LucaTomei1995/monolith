@@ -15,6 +15,7 @@ import "codemirror/addon/hint/sql-hint";
 import "codemirror/addon/hint/show-hint.css";
 import "codemirror/addon/hint/show-hint";
 import "../css/codeMirror.css";
+import { getLine } from "codemirror/src/line/utils_line";
 
 var CodeMirror = require("react-codemirror");
 
@@ -92,12 +93,19 @@ class CodeEditorField extends React.Component {
       var tableName = tab["tables"][i]["name"];
       var listAttributes = tab["tables"][i]["attributes"];
       var numAttributesInTable = listAttributes.length;
-      retDict.push({ text: tableName, displayText: tableName }); // name:nometabella,
+      retDict.push({
+        text: tableName,
+        displayText: tableName,
+        className: "table"
+      }); // name:nometabella,
+      console.log("retDict :", retDict);
 
       for (var j = 0; j < numAttributesInTable; j++) {
         retDict.push({
           text: listAttributes[j],
-          displayText: listAttributes[j] + " - (Attribute of " + tableName + ")"
+          displayText:
+            listAttributes[j] + " - (Attribute of " + tableName + ")",
+          className: "attribute"
         }); // name:nometabella,
       }
     }
@@ -138,13 +146,18 @@ class CodeEditorField extends React.Component {
       "LIMIT"
     ];
     for (var k = 0; k < sqlList.length; k++)
-      retDict.push({ text: sqlList[k], displayText: sqlList[k] });
+      retDict.push({
+        text: sqlList[k],
+        displayText: sqlList[k],
+        className: "defaultSql"
+      });
 
     this.setState({ sqlTables: retDict });
   };
 
   autoComplete = cm => {
     const codeMirror = this.refs["CodeMirror"].getCodeMirrorInstance();
+    // this.test1();
     const hintOptions = {
       tables: this.state.sqlTables,
       disableKeywords: true,
