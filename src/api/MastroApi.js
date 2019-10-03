@@ -542,14 +542,11 @@ export function getMappingView(name, version, mapping, viewID, callback) {
 
 /*MIA*/
 export function postSQLEx(query, version, mapping, jdbcEntry ,callback) {
-
-    // ho una enmtry fatta così:    jdbcEntry:[{jdbcDB:null,jdbcDriver:null, jdbcUsername:null, jdbcPassword:null}]
-
     if (fakeCalls) return callback(fakeData.queryCatalog)       
     const url = localStorage.getItem('mastroUrl') + '/owlOntology/version/mapping/' + mapping + '/views/tableView';
     const method = 'POST'
     const encodedVersion = version//encodeURIComponent(version)
-    let json = {"queryCode": query ,'jdbcUrl':jdbcEntry['jdbcUrl'] ,'jdbcDriver':jdbcEntry['jdbcDriver'],"dbName":jdbcEntry['jdbcDB'], 'jdbcUsername':jdbcEntry['jdbcUsername'], 'jdbcPassword': jdbcEntry['jdbcPassword']}
+    let json = {"queryCode": query ,"dbName":jdbcEntry['jdbcDB']}
     axios({
         url: url,
         method: method,
@@ -568,7 +565,7 @@ export function getTableResult(version, mapping, jdbcEntry,callback) {
     const url = localStorage.getItem('mastroUrl') + '/owlOntology/version/mapping/' + mapping + '/views/tables';
     const method = 'POST'
     const encodedVersion = version//encodeURIComponent(version)
-    let json = {"queryCode": null ,'jdbcUrl':jdbcEntry['jdbcUrl'] ,'jdbcDriver':jdbcEntry['jdbcDriver'],"dbName":jdbcEntry['jdbcDB'], 'jdbcUsername':jdbcEntry['jdbcUsername'], 'jdbcPassword': jdbcEntry['jdbcPassword']}
+    let json = {"queryCode": null ,"dbName":jdbcEntry['jdbcDB']}
     axios({
         url: url,
         method: method,

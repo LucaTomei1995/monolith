@@ -1095,7 +1095,7 @@ public class MwsxService {
 	@Produces("application/json")
 	@Consumes("application/json")
 	@MwsxAvailable
-	public Response executeSql(
+	public Response postSQLEx(
 			@Context HttpServletRequest request,
 			@Context HttpServletResponse response, @PathParam("ID") String ID,
 			SQLQuery query) { 
@@ -1103,7 +1103,8 @@ public class MwsxService {
 		String q = query.getQueryCode();
 		String dbName = query.getDbName().toLowerCase();
 		String queryStr = query.getQueryCode().toLowerCase();
-		JDBCTestQuery t = new JDBCTestQuery(query);
+		DataSourceInfoEntry info = MwsxService.ontologyManager.getDataSourceInfoEntry(query.getDbName());
+		JDBCTestQuery t = new JDBCTestQuery(query, info.getJdbcDriver(), info.getJdbcUrl(), info.getJdbcUsername(), info.getJdbcPassword());
 
 		String queryRes = t.getResults(queryStr);
 		if(queryRes == null)	System.err.println("Nessun Risultato dalla query");
@@ -1120,7 +1121,8 @@ public class MwsxService {
 			@Context HttpServletRequest request,
 			@Context HttpServletResponse response, @PathParam("ID") String ID,
 			SQLQuery query) {
-		JDBCTestQuery t = new JDBCTestQuery(query);
+		DataSourceInfoEntry info = MwsxService.ontologyManager.getDataSourceInfoEntry(query.getDbName());
+		JDBCTestQuery t = new JDBCTestQuery(query, info.getJdbcDriver(), info.getJdbcUrl(), info.getJdbcUsername(), info.getJdbcPassword());
 		String tableRes = t.getTables();
 		if(tableRes == null)	System.err.println("Nessun Risultato dalla getTables");
 		return Response.ok().entity(tableRes).build();

@@ -14,9 +14,16 @@ import com.mwsx.model.SQLQuery;
 
 public class JDBCTestQuery {	// PROVA CON MYSQL
 	private static SQLQuery query;
-	
-	public JDBCTestQuery(SQLQuery query) {
+	private static  String jdbcDriver; 
+	private static String jdbcUrl;
+	private static String jdbcUsername;
+	private static String jdbcPassword;
+	public JDBCTestQuery(SQLQuery query, String jdbcDriver, String jdbcUrl, String jdbcUsername, String jdbcPassword) {
 		this.query = query;
+		this.jdbcDriver = jdbcDriver;
+		this.jdbcPassword = jdbcPassword;
+		this.jdbcUrl = jdbcUrl;
+		this.jdbcUsername = jdbcUsername;
 	}
 	public static SQLQuery getQuery() {
 		return query;
@@ -25,8 +32,8 @@ public class JDBCTestQuery {	// PROVA CON MYSQL
 	public String getResults(String query) {
 		String resultString = "", columns_name = "";
 		try {
-			Class.forName(this.query.getJdbcDriver());
-			Connection conn = DriverManager.getConnection(this.query.getJdbcUrl() /*+ dbName*/, this.query.getJdbcUsername(), this.query.getJdbcPassword());
+			Class.forName(this.jdbcDriver);
+			Connection conn = DriverManager.getConnection(this.jdbcUrl /*+ dbName*/, this.jdbcUsername, this.jdbcPassword);
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
 			ResultSetMetaData rsmd = rs.getMetaData();
@@ -51,8 +58,8 @@ public class JDBCTestQuery {	// PROVA CON MYSQL
 		
 		try {
 			
-			Class.forName(this.query.getJdbcDriver());
-			Connection conn = DriverManager.getConnection(this.query.getJdbcUrl() /*+ dbName*/, this.query.getJdbcUsername(), this.query.getJdbcPassword());
+			Class.forName(this.jdbcDriver);
+			Connection conn = DriverManager.getConnection(this.jdbcUrl /*+ dbName*/, this.jdbcUsername, this.jdbcPassword);
 			DatabaseMetaData dbmd = conn.getMetaData();
             String[] types = {"TABLE"};
             ResultSet rs = dbmd.getTables(null, null, "%", types);

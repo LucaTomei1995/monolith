@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.swing.JOptionPane;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -159,7 +158,6 @@ import com.mwsx.model.SPARQLQueryExecution;
 import com.mwsx.model.SPARQLResult;
 import com.mwsx.model.SPARQLResults;
 import com.mwsx.model.SPARQLStatus;
-import com.mwsx.model.SQLQuery;
 import com.mwsx.model.SQLView;
 import com.mwsx.model.SQLViews;
 import com.mwsx.model.SqlQueryInfo;
@@ -1236,7 +1234,6 @@ public class MwsxOntologyManager {
 
 	public Mapping postMapping(String name, String version, FileInfo info)
 			throws JsonParseException, JsonMappingException, IOException, MappingFileMalformedException, SAXException {
-		//d.stampa();
 		String pathName = MwsxRepositoryManager.generateOntologyFolder(name);
 		String versionPathName = MwsxRepositoryManager.generateOntologyVersionFolder(version);
 		Mappings mappings = getMappings(name, version);
@@ -1411,9 +1408,6 @@ public class MwsxOntologyManager {
 	public FileInfo deleteMapping(String name, String version, String mappingID)
 			throws JsonParseException, JsonMappingException, IOException {
 		Mappings mappings = getMappings(name, version);
-		
-		
-		
 		Mappings newMappings = new Mappings();
 		FileInfo remove = null;
 		List<Mapping> mappingsList = new LinkedList<Mapping>();
@@ -3081,8 +3075,6 @@ public class MwsxOntologyManager {
 		ObjectMapper om = new ObjectMapper();
 		NewMappingFileInfo nmfi = om.readValue(java.util.Base64.getDecoder().decode(create.getBytes()), NewMappingFileInfo.class);
 		DatabaseConnection _preExistingDatabaseConnection = null;
-		
-		
 		if (nmfi.getDatabaseConnectionName() != null) {
 			boolean found = false;
 			for (DataSourceInfoEntry entry : this.getDataSourceInfoEntries(session.getUser())) {
@@ -3119,7 +3111,6 @@ public class MwsxOntologyManager {
 				throw new RuntimeException("No valid datasource specified for new mappings");
 			}
 		}
-		
 		String pathName = MwsxRepositoryManager.generateOntologyFolder(name);
 		String versionPathName = MwsxRepositoryManager.generateOntologyVersionFolder(version);
 		Mappings mappings = getMappings(name, version);
@@ -3799,4 +3790,5 @@ public class MwsxOntologyManager {
 		}
 		return true;
 	}
+	
 }
