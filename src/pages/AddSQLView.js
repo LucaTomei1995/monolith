@@ -15,7 +15,6 @@ import "codemirror/addon/hint/sql-hint";
 import "codemirror/addon/hint/show-hint.css";
 import "codemirror/addon/hint/show-hint";
 import "../css/codeMirror.css";
-import { getLine } from "codemirror/src/line/utils_line";
 
 var CodeMirror = require("react-codemirror");
 

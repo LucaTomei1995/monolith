@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, Button, Col, Row, Input, Select } from "antd";
+import { Form, Button, Col, Row, Input, Select, Dropdown, Menu } from "antd";
 import {
   getMappingViews,
   postMappingAssertion,
@@ -20,10 +20,12 @@ import "codemirror/addon/lint/lint.css";
 
 var CodeMirror = require("react-codemirror");
 
+const menuString = ["test", "prova", "prova", "test"];
 class AssertionForm extends React.Component {
   state = {
     mappingViews: [],
-    tables: []
+    tables: [],
+    menuString: []
   };
 
   componentDidMount() {
@@ -196,8 +198,8 @@ class AssertionForm extends React.Component {
   onChange = value => {
     var editor = document.querySelector(".CodeMirror").CodeMirror;
     var doc = editor.getDoc();
-    var cursor = doc.getCursor(); //['line']
-    var line = doc.getLine(cursor.line);
+    //var cursor = doc.getCursor(); //['line']
+    // var line = doc.getLine(cursor.line);
     this.codeMirrorMarkText(doc, 1, 9, 13);
 
     /*console.log(cursor);
@@ -462,6 +464,7 @@ class AssertionForm extends React.Component {
     };
     codeMirror.showHint(cm, codeMirror.hint.sql, hintOptions);
   };
+
   handleChange = value => {};
 
   render() {
@@ -475,6 +478,17 @@ class AssertionForm extends React.Component {
         "Ctrl-Space": this.autoComplete
       }
     };
+
+    const menuItems = () => (
+      <Menu theme="dark">
+        {menuString.map((i, k) => (
+          <Menu.Item key={k} name={k}>
+            <span>{i}</span>
+          </Menu.Item>
+        ))}
+      </Menu>
+    );
+
     return (
       <div>
         <CodeMirror
@@ -484,7 +498,7 @@ class AssertionForm extends React.Component {
         />
         <Form layout="vertical">
           <Row gutter={16}>
-            <Col span={12}>
+            <Col span={20}>
               <Form.Item label="Body">
                 {getFieldDecorator("body", {
                   rules: [
@@ -512,7 +526,7 @@ class AssertionForm extends React.Component {
           )}
           {this.props.type === predicateTypes.c && (
             <Row gutter={16}>
-              <Col span={12}>
+              <Col span={20}>
                 <Form.Item label="Template">
                   {getFieldDecorator("template", {
                     rules: [
@@ -523,6 +537,19 @@ class AssertionForm extends React.Component {
                     ]
                   })(<Input />)}
                 </Form.Item>
+              </Col>
+              <Col span={2}>
+                <Dropdown overlay={menuItems} placement="bottomLeft">
+                  <Button
+                    style={{
+                      float: "right",
+                      backgroundColor: "transparent",
+                      marginTop: "90%"
+                    }}
+                    icon="plus"
+                    shape="circle"
+                  />
+                </Dropdown>
               </Col>
             </Row>
           )}
