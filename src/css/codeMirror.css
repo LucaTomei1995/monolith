@@ -43,3 +43,9 @@
   background-color: var(--medium);
 }
 
+
+.ant-input-group-addon{
+  background-color: var(--medium);
+  color:white;
+  border-color:var(--medium);
+}

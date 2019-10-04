@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, Button, Col, Row, Input, Select, Dropdown, Menu } from "antd";
+import { Form, Button, Col, Row, Input, Select, Dropdown, Menu} from "antd";
 import {
   getMappingViews,
   postMappingAssertion,
@@ -20,12 +20,15 @@ import "codemirror/addon/lint/lint.css";
 
 var CodeMirror = require("react-codemirror");
 
-const menuString = ["test", "prova", "prova", "test"];
+const menuString = ["code", "type", "cane", "bestiua"];
+const rangeTemplateString = menuString;
 class AssertionForm extends React.Component {
   state = {
     mappingViews: [],
     tables: [],
-    menuString: []
+    menuString: [],
+    templateInState: "",
+    rangeInState: ""
   };
 
   componentDidMount() {
@@ -37,12 +40,13 @@ class AssertionForm extends React.Component {
     );
     if (this.props.assertion) {
       this.props.form.setFieldsValue({
-        template: this.props.assertion.mappingHead.firstArg,
-        domainTemplate: this.props.assertion.mappingHead.firstArg,
-        rangeTemplate: this.props.assertion.mappingHead.secondArg,
+        template: this.props.assertion.mappingHead.firstArg !== null ? this.props.assertion.mappingHead.firstArg.replace(/(^\w+:|^)\/\//, '') :null,
+        domainTemplate: this.props.assertion.mappingHead.firstArg !== null ? this.props.assertion.mappingHead.firstArg.replace(/(^\w+:|^)\/\//, '') : null,
+        rangeTemplate: this.props.assertion.mappingHead.secondArg !== null ? this.props.assertion.mappingHead.secondArg.replace(/(^\w+:|^)\/\//, ''): null,
         body: this.props.assertion.mappingBody.bodyFrom[0].sqlViewID
       });
     }
+
     const codemirrorStyle = document.querySelector(".CodeMirror-scroll");
 
     codemirrorStyle.classList.add("ant-input");
@@ -101,6 +105,7 @@ class AssertionForm extends React.Component {
 
   submit = () => {
     this.props.form.validateFieldsAndScroll((err, values) => {
+      console.log(this.props.form)
       if (!err) {
         const assertion = {
           entityID: this.props.entity.entityID,
@@ -112,6 +117,9 @@ class AssertionForm extends React.Component {
           rangeTemplate:
             this.props.type === predicateTypes.c ? null : values.rangeTemplate
         };
+        
+        assertion.template = 'http://'+ assertion.template;
+        if(this.props.type != predicateTypes.c) assertion.rangeTemplate = 'http://'+ assertion.rangeTemplate;
         if (this.props.assertion) {
           putMappingAssertion(
             this.props.ontology.name,
@@ -253,7 +261,6 @@ class AssertionForm extends React.Component {
       var where = "";
       if (select.startsWith("select")) {
         if (select.split("select")[1][0] !== " ") {
-          // alert("Errore nella select");
         } else {
           if (select.includes(" from ")) {
             from = select.substr(select.indexOf(" from ")).trimLeft();
@@ -348,51 +355,6 @@ class AssertionForm extends React.Component {
         }
       }
     }
-    // if(value.includes("select")){
-    //     if(value.trimLeft().startsWith("select") && (value.trimLeft().split("select")[1][0] === '  ') ){
-    //         alert("ciao");
-    //         var attributes = value.split("select");
-    //         if(attributes[1].includes("from")){
-    //             var views = attributes[1].split("from")[1];
-    //             attributes = attributes[1].split("from")[0];
-    //             if(views.includes("where")){
-    //                 var conditions = views.split("where")[1];
-    //                 views = views.split("where")[0];
-    //             }
-    //             var numViews = numItems(views);
-    //             views = views.split(",");
-    //             var numAttributes = numItems(attributes);
-    //             if(numAttributes != 0){
-    //                 attributes = attributes.split(",");
-    //                 for(var i = 0; i < numAttributes; i++){
-    //                     for(var j = 0; j < numViews ; j++){
-    //                         if(this.state.mappingViews.filter(v => v.sqlViewID === views[j].trim())[0]){
-    //                             var temp = this.state.mappingViews.filter(v => v.sqlViewID === views[j].trim())[0].sqlViewCode.toLowerCase().split("select ");
-    //                             temp = temp[1].split("from ")[0];
-    //                             var tempNum = numItems(temp);
-    //                             temp = temp.split(",");
-    //                             for(var k = 0; k < tempNum ; k++){
-    //                                 if(temp[k].includes(" as ")){
-    //                                     temp[k] = temp[k].split(" as ")[1];
-    //                                 }
-    //                                 else{
-    //                                     temp[k] = temp[k].split(" as ")[0];
-    //                                 }
-
-    //                                 if(temp[k].trim() === attributes[i].trim()){
-    //                                     alert("ci sta");
-    //                                 }
-    //                             }
-    //                         }
-    //                         else{
-    //                             // alert("Hai inserito una vista non valida");
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
   };
 
   getAutoComplete = dbResult => {
@@ -467,6 +429,26 @@ class AssertionForm extends React.Component {
 
   handleChange = value => {};
 
+  handleMenutItem = (value) =>{
+    if(this.props.type === predicateTypes.c){
+      this.props.form.setFieldsValue({
+        template: document.getElementById("template").value += '{'+ value + '}'
+      });
+      
+    }else if(this.props.type === predicateTypes.op || this.props.type === predicateTypes.dp){
+      this.props.form.setFieldsValue({
+        domainTemplate: document.getElementById("domainTemplate").value += '{'+ value + '}'
+      });
+    }
+  }
+
+  handleMenutItemForRange = (value) =>{
+    this.props.form.setFieldsValue({
+        rangeTemplate: document.getElementById("rangeTemplate").value += '{'+ value + '}'
+    });
+   
+  }
+  
   render() {
     const { getFieldDecorator } = this.props.form;
     const options = {
@@ -480,10 +462,35 @@ class AssertionForm extends React.Component {
     };
 
     const menuItems = () => (
-      <Menu theme="dark">
+      <Menu
+        style={{ backgroundColor: "var(--medium)" }}
+      >
         {menuString.map((i, k) => (
-          <Menu.Item key={k} name={k}>
-            <span>{i}</span>
+          <Menu.Item
+            style={{ backgroundColor: "var(--medium)", color:'white' }}
+            onClick={value => this.handleMenutItem(value.item.props.value)}
+            value={i}
+            key={k}
+          >
+            {i}
+          </Menu.Item>
+        ))}
+      </Menu>
+    );
+   
+
+    const menuItemsForRange = () => (
+      <Menu
+        style={{ backgroundColor: "var(--medium)" }}
+      >
+        {rangeTemplateString.map((i, k) => (
+          <Menu.Item
+            style={{ backgroundColor: "var(--medium)", color:'white' }}
+            onClick={value => this.handleMenutItemForRange(value.item.props.value)}
+            value={i}
+            key={k}
+          >
+            {i}
           </Menu.Item>
         ))}
       </Menu>
@@ -535,7 +542,7 @@ class AssertionForm extends React.Component {
                         message: "Please enter datasource name"
                       }
                     ]
-                  })(<Input />)}
+                  })(<Input addonBefore="http://"/>)}
                 </Form.Item>
               </Col>
               <Col span={2}>
@@ -556,7 +563,7 @@ class AssertionForm extends React.Component {
           {this.props.type === predicateTypes.op && (
             <div>
               <Row gutter={16}>
-                <Col span={12}>
+               <Col span={20}>
                   <Form.Item label="Domain Template">
                     {getFieldDecorator("domainTemplate", {
                       rules: [
@@ -565,12 +572,25 @@ class AssertionForm extends React.Component {
                           message: "Please enter datasource name"
                         }
                       ]
-                    })(<Input />)}
+                    })(<Input addonBefore="http://"/>)}
                   </Form.Item>
                 </Col>
+                <Col span={2}>
+                <Dropdown overlay={menuItems} placement="bottomLeft">
+                  <Button
+                    style={{
+                      float: "right",
+                      backgroundColor: "transparent",
+                      marginTop: "90%"
+                    }}
+                    icon="plus"
+                    shape="circle"
+                  />
+                </Dropdown>
+              </Col>
               </Row>
               <Row gutter={16}>
-                <Col span={12}>
+                <Col span={20}>
                   <Form.Item label="Range Template">
                     {getFieldDecorator("rangeTemplate", {
                       rules: [
@@ -579,16 +599,29 @@ class AssertionForm extends React.Component {
                           message: "Please enter datasource name"
                         }
                       ]
-                    })(<Input />)}
+                    })(<Input addonBefore="http://"/>)}
                   </Form.Item>
                 </Col>
+                <Col span={2}>
+                <Dropdown overlay={menuItemsForRange} placement="bottomLeft">
+                  <Button
+                    style={{
+                      float: "right",
+                      backgroundColor: "transparent",
+                      marginTop: "90%"
+                    }}
+                    icon="plus"
+                    shape="circle"
+                  />
+                </Dropdown>
+              </Col>
               </Row>
             </div>
           )}
           {this.props.type === predicateTypes.dp && (
             <div>
               <Row gutter={16}>
-                <Col span={12}>
+                <Col span={20}>
                   <Form.Item label="Domain Template">
                     {getFieldDecorator("domainTemplate", {
                       rules: [
@@ -597,12 +630,25 @@ class AssertionForm extends React.Component {
                           message: "Please enter datasource name"
                         }
                       ]
-                    })(<Input />)}
+                    })(<Input addonBefore="http://"/>)}
                   </Form.Item>
                 </Col>
+                <Col span={2}>
+                <Dropdown overlay={menuItems} placement="bottomLeft">
+                  <Button
+                    style={{
+                      float: "right",
+                      backgroundColor: "transparent",
+                      marginTop: "90%"
+                    }}
+                    icon="plus"
+                    shape="circle"
+                  />
+                </Dropdown>
+              </Col>
               </Row>
               <Row gutter={16}>
-                <Col span={12}>
+                <Col span={20}>
                   <Form.Item label="Range">
                     {getFieldDecorator("rangeTemplate", {
                       rules: [
@@ -611,9 +657,10 @@ class AssertionForm extends React.Component {
                           message: "Please enter datasource name"
                         }
                       ]
-                    })(<Input />)}
+                    })(<Input/>)}
                   </Form.Item>
                 </Col>
+                
               </Row>
             </div>
           )}
