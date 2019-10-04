@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, Button, Col, Row, Input, Select, Dropdown, Menu} from "antd";
+import { Form, Button, Col, Row, Input, Select, Dropdown, Menu } from "antd";
 import {
   getMappingViews,
   postMappingAssertion,
@@ -40,9 +40,27 @@ class AssertionForm extends React.Component {
     );
     if (this.props.assertion) {
       this.props.form.setFieldsValue({
-        template: this.props.assertion.mappingHead.firstArg !== null ? this.props.assertion.mappingHead.firstArg.replace(/(^\w+:|^)\/\//, '') :null,
-        domainTemplate: this.props.assertion.mappingHead.firstArg !== null ? this.props.assertion.mappingHead.firstArg.replace(/(^\w+:|^)\/\//, '') : null,
-        rangeTemplate: this.props.assertion.mappingHead.secondArg !== null ? this.props.assertion.mappingHead.secondArg.replace(/(^\w+:|^)\/\//, ''): null,
+        template:
+          this.props.assertion.mappingHead.firstArg !== null
+            ? this.props.assertion.mappingHead.firstArg.replace(
+                /(^\w+:|^)\/\//,
+                ""
+              )
+            : null,
+        domainTemplate:
+          this.props.assertion.mappingHead.firstArg !== null
+            ? this.props.assertion.mappingHead.firstArg.replace(
+                /(^\w+:|^)\/\//,
+                ""
+              )
+            : null,
+        rangeTemplate:
+          this.props.assertion.mappingHead.secondArg !== null
+            ? this.props.assertion.mappingHead.secondArg.replace(
+                /(^\w+:|^)\/\//,
+                ""
+              )
+            : null,
         body: this.props.assertion.mappingBody.bodyFrom[0].sqlViewID
       });
     }
@@ -105,7 +123,7 @@ class AssertionForm extends React.Component {
 
   submit = () => {
     this.props.form.validateFieldsAndScroll((err, values) => {
-      console.log(this.props.form)
+      console.log(this.props.form);
       if (!err) {
         const assertion = {
           entityID: this.props.entity.entityID,
@@ -117,9 +135,10 @@ class AssertionForm extends React.Component {
           rangeTemplate:
             this.props.type === predicateTypes.c ? null : values.rangeTemplate
         };
-        
-        assertion.template = 'http://'+ assertion.template;
-        if(this.props.type != predicateTypes.c) assertion.rangeTemplate = 'http://'+ assertion.rangeTemplate;
+
+        assertion.template = "http://" + assertion.template;
+        if (this.props.type !== predicateTypes.c)
+          assertion.rangeTemplate = "http://" + assertion.rangeTemplate;
         if (this.props.assertion) {
           putMappingAssertion(
             this.props.ontology.name,
@@ -429,26 +448,30 @@ class AssertionForm extends React.Component {
 
   handleChange = value => {};
 
-  handleMenutItem = (value) =>{
-    if(this.props.type === predicateTypes.c){
+  handleMenutItem = value => {
+    if (this.props.type === predicateTypes.c) {
       this.props.form.setFieldsValue({
-        template: document.getElementById("template").value += '{'+ value + '}'
+        template: (document.getElementById("template").value +=
+          "{" + value + "}")
       });
-      
-    }else if(this.props.type === predicateTypes.op || this.props.type === predicateTypes.dp){
+    } else if (
+      this.props.type === predicateTypes.op ||
+      this.props.type === predicateTypes.dp
+    ) {
       this.props.form.setFieldsValue({
-        domainTemplate: document.getElementById("domainTemplate").value += '{'+ value + '}'
+        domainTemplate: (document.getElementById("domainTemplate").value +=
+          "{" + value + "}")
       });
     }
-  }
+  };
 
-  handleMenutItemForRange = (value) =>{
+  handleMenutItemForRange = value => {
     this.props.form.setFieldsValue({
-        rangeTemplate: document.getElementById("rangeTemplate").value += '{'+ value + '}'
+      rangeTemplate: (document.getElementById("rangeTemplate").value +=
+        "{" + value + "}")
     });
-   
-  }
-  
+  };
+
   render() {
     const { getFieldDecorator } = this.props.form;
     const options = {
@@ -462,12 +485,10 @@ class AssertionForm extends React.Component {
     };
 
     const menuItems = () => (
-      <Menu
-        style={{ backgroundColor: "var(--medium)" }}
-      >
+      <Menu style={{ backgroundColor: "var(--medium)" }}>
         {menuString.map((i, k) => (
           <Menu.Item
-            style={{ backgroundColor: "var(--medium)", color:'white' }}
+            style={{ backgroundColor: "var(--medium)", color: "white" }}
             onClick={value => this.handleMenutItem(value.item.props.value)}
             value={i}
             key={k}
@@ -477,16 +498,15 @@ class AssertionForm extends React.Component {
         ))}
       </Menu>
     );
-   
 
     const menuItemsForRange = () => (
-      <Menu
-        style={{ backgroundColor: "var(--medium)" }}
-      >
+      <Menu style={{ backgroundColor: "var(--medium)" }}>
         {rangeTemplateString.map((i, k) => (
           <Menu.Item
-            style={{ backgroundColor: "var(--medium)", color:'white' }}
-            onClick={value => this.handleMenutItemForRange(value.item.props.value)}
+            style={{ backgroundColor: "var(--medium)", color: "white" }}
+            onClick={value =>
+              this.handleMenutItemForRange(value.item.props.value)
+            }
             value={i}
             key={k}
           >
@@ -542,7 +562,7 @@ class AssertionForm extends React.Component {
                         message: "Please enter datasource name"
                       }
                     ]
-                  })(<Input addonBefore="http://"/>)}
+                  })(<Input addonBefore="http://" />)}
                 </Form.Item>
               </Col>
               <Col span={2}>
@@ -563,7 +583,7 @@ class AssertionForm extends React.Component {
           {this.props.type === predicateTypes.op && (
             <div>
               <Row gutter={16}>
-               <Col span={20}>
+                <Col span={20}>
                   <Form.Item label="Domain Template">
                     {getFieldDecorator("domainTemplate", {
                       rules: [
@@ -572,22 +592,22 @@ class AssertionForm extends React.Component {
                           message: "Please enter datasource name"
                         }
                       ]
-                    })(<Input addonBefore="http://"/>)}
+                    })(<Input addonBefore="http://" />)}
                   </Form.Item>
                 </Col>
                 <Col span={2}>
-                <Dropdown overlay={menuItems} placement="bottomLeft">
-                  <Button
-                    style={{
-                      float: "right",
-                      backgroundColor: "transparent",
-                      marginTop: "90%"
-                    }}
-                    icon="plus"
-                    shape="circle"
-                  />
-                </Dropdown>
-              </Col>
+                  <Dropdown overlay={menuItems} placement="bottomLeft">
+                    <Button
+                      style={{
+                        float: "right",
+                        backgroundColor: "transparent",
+                        marginTop: "90%"
+                      }}
+                      icon="plus"
+                      shape="circle"
+                    />
+                  </Dropdown>
+                </Col>
               </Row>
               <Row gutter={16}>
                 <Col span={20}>
@@ -599,22 +619,22 @@ class AssertionForm extends React.Component {
                           message: "Please enter datasource name"
                         }
                       ]
-                    })(<Input addonBefore="http://"/>)}
+                    })(<Input addonBefore="http://" />)}
                   </Form.Item>
                 </Col>
                 <Col span={2}>
-                <Dropdown overlay={menuItemsForRange} placement="bottomLeft">
-                  <Button
-                    style={{
-                      float: "right",
-                      backgroundColor: "transparent",
-                      marginTop: "90%"
-                    }}
-                    icon="plus"
-                    shape="circle"
-                  />
-                </Dropdown>
-              </Col>
+                  <Dropdown overlay={menuItemsForRange} placement="bottomLeft">
+                    <Button
+                      style={{
+                        float: "right",
+                        backgroundColor: "transparent",
+                        marginTop: "90%"
+                      }}
+                      icon="plus"
+                      shape="circle"
+                    />
+                  </Dropdown>
+                </Col>
               </Row>
             </div>
           )}
@@ -630,22 +650,22 @@ class AssertionForm extends React.Component {
                           message: "Please enter datasource name"
                         }
                       ]
-                    })(<Input addonBefore="http://"/>)}
+                    })(<Input addonBefore="http://" />)}
                   </Form.Item>
                 </Col>
                 <Col span={2}>
-                <Dropdown overlay={menuItems} placement="bottomLeft">
-                  <Button
-                    style={{
-                      float: "right",
-                      backgroundColor: "transparent",
-                      marginTop: "90%"
-                    }}
-                    icon="plus"
-                    shape="circle"
-                  />
-                </Dropdown>
-              </Col>
+                  <Dropdown overlay={menuItems} placement="bottomLeft">
+                    <Button
+                      style={{
+                        float: "right",
+                        backgroundColor: "transparent",
+                        marginTop: "90%"
+                      }}
+                      icon="plus"
+                      shape="circle"
+                    />
+                  </Dropdown>
+                </Col>
               </Row>
               <Row gutter={16}>
                 <Col span={20}>
@@ -657,10 +677,9 @@ class AssertionForm extends React.Component {
                           message: "Please enter datasource name"
                         }
                       ]
-                    })(<Input/>)}
+                    })(<Input />)}
                   </Form.Item>
                 </Col>
-                
               </Row>
             </div>
           )}
