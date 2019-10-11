@@ -20,8 +20,6 @@ import "codemirror/addon/lint/lint.css";
 
 var CodeMirror = require("react-codemirror");
 
-// const menuString = ["code", "type", "cane", "bestiua"];
-// const rangeTemplateString = menuString;
 class AssertionForm extends React.Component {
   state = {
     mappingViews: [],
@@ -30,6 +28,20 @@ class AssertionForm extends React.Component {
     templateInState: "",
     rangeInState: "",
     mappingAttribute: [],
+    predicates: [
+      ">",
+      ">=",
+      "<",
+      "=<",
+      "=",
+      "<>",
+      "IS NULL",
+      "IS NOT NULL",
+      "NOT IN",
+      "BETWEEN",
+      "LIKE",
+      "NOT LIKE"
+    ],
   };
 
   componentDidMount() {
@@ -72,12 +84,9 @@ class AssertionForm extends React.Component {
   }
 
   loaded = mappingViews => {
-    // alert(mappingViews[0].sqlViewID);
-    // alert(mappingViews.length);
     var retDict = [];
     var numElements = mappingViews.length;
     for (var i = 0; i < numElements; i++) {
-      // alert(mappingViews[i].sqlViewCode);
       retDict.push({
         text: mappingViews[i].sqlViewID,
         displayText: mappingViews[i].sqlViewID
@@ -87,20 +96,6 @@ class AssertionForm extends React.Component {
     for (var j = 0; j < sqlList.length; j++)
       retDict.push({ text: sqlList[j], displayText: sqlList[j] });
 
-    sqlList = [
-      ">",
-      ">=",
-      "<",
-      "=<",
-      "=",
-      "<>",
-      "IS NULL",
-      "IS NOT NULL",
-      "NOT_IN",
-      "BETWEEN",
-      "LIKE",
-      "NOT_LIKE"
-    ];
     var sqlListText = [
       "GREATER THAN",
       "GREATER EQUAL THAN",
@@ -115,8 +110,8 @@ class AssertionForm extends React.Component {
       "LIKE",
       "NOT LIKE"
     ];
-    for (var k = 0; k < sqlList.length; k++)
-      retDict.push({ text: sqlList[k], displayText: sqlListText[k] });
+    for (var k = 0; k < this.state.predicates.length; k++)
+      retDict.push({ text: this.state.predicates[k], displayText: sqlListText[k] });
 
     this.setState({ tables: retDict });
     this.setState({ mappingViews });
@@ -175,10 +170,6 @@ class AssertionForm extends React.Component {
     });
   };
 
-  // Seleziona il testo di rosso che si trova:
-    // - Nella linea line
-    //      - con parola che inizia in posizione fromCH
-    //      - e finisce a posizione toCH
     codeMirrorMarkText = (doc, line, fromCH , toCH) =>{
         doc.markText({
           line: line,
@@ -191,7 +182,6 @@ class AssertionForm extends React.Component {
         });
     }
 
-    // Rimuove lo stile a tutta la textarea: gli devi passare il doc
     codeRemoveMarkedText = (doc) =>{
         var numLines = this.howManyLinesInCodemirror(doc)
         for(var i = 0; i < numLines; i++){
@@ -245,7 +235,6 @@ class AssertionForm extends React.Component {
         }
     }
 
-    // ritorna il numero di linee presenti nell'editor
     howManyLinesInCodemirror = (doc) => {
         return doc['children'][0]['lines']['length']
     }
@@ -270,7 +259,6 @@ class AssertionForm extends React.Component {
                         }
                     }
                     else{
-                        //check this line maybe error 
                         if(elementInLine[i].includes(" from ")){
                             let temp = elementInLine[i].split(" from ")[0];
                             this.codeMirrorMarkText(doc , fromLine , lineText.indexOf(temp) , temp.length + lineText.indexOf(temp) );
@@ -308,7 +296,6 @@ class AssertionForm extends React.Component {
                     }
                 }
                 else{
-                    //check this line maybe error 
                     if(elementInLine[i].includes(" from ")){
                         let temp = elementInLine[i].split(" from ")[0];
                         if(temp.trim() === wrongAttribute.trim()){
@@ -353,7 +340,6 @@ class AssertionForm extends React.Component {
                         }
                     }
                     else{
-                        //check this line maybe error 
                         if(elementInLine[i].includes(" where ")){
                             let temp = elementInLine[i].split(" where ")[0];
                             this.codeMirrorMarkText(doc , fromLine , lineText.indexOf(temp) , temp.length + lineText.indexOf(temp) );
@@ -388,7 +374,6 @@ class AssertionForm extends React.Component {
                         }
                     }
                     else{
-                        //check this line maybe error 
                         if(elementInLine[i].includes(" from ")){
                             let temp = elementInLine[i].split(" from ")[0];
                             this.codeMirrorMarkText(doc , fromLine , lineText.indexOf(temp) , temp.length + lineText.indexOf(temp) );
@@ -449,7 +434,27 @@ class AssertionForm extends React.Component {
         }
     }
 
-    existAttributeInView = (attribute , view) =>{
+    existAttributeInView = (attribute , view , views) =>{
+        let tempAttribute;
+        if(attribute.includes(".")){
+            tempAttribute = attribute.split(".");
+            if(this.existView(tempAttribute[0])){
+                if(views.includes(tempAttribute[0])){
+                    if(!this.existAttributeInView(tempAttribute[1] , tempAttribute[0])){
+                        return false;
+                    }
+                    else{
+                        attribute = tempAttribute[1];
+                    }
+                }
+                else{
+                    return false;
+                }
+            }
+            else{
+                return false;
+            }
+        }
         let temp = this.optimizeMappingBody(this.state.mappingViews.filter(v => v.sqlViewID === view)[0].sqlViewCode.toLowerCase() , "view")[0].split("select ")[1];
         let tempNum = this.numItems(temp);
         temp = temp.split(",");
@@ -468,6 +473,19 @@ class AssertionForm extends React.Component {
         return false;
     }
 
+    existCondition = (currentValue) =>{
+        let numPredicates = this.state.predicates.length;
+        for(let i = 0 ; i < numPredicates ; i++){
+            if(!currentValue.includes(this.state.predicates[i].toLowerCase())){
+                if(i+1 === numPredicates){
+                    return false;
+                }
+            }
+            else{
+                return true;
+            }
+        }
+    }
     nth_occurrence = (string, char, nth) => {
         var first_index = string.indexOf(char);
         var length_up_to_first_index = first_index + 1;
@@ -500,8 +518,6 @@ class AssertionForm extends React.Component {
     optimizeMappingBody = (string , type) => {
         var editor = document.querySelector(".CodeMirror").CodeMirror;
         var doc = editor.getDoc();
-        // var cursor = doc.getCursor();//['line']
-        // var line = doc.getLine(cursor.line);
 
         var select = string;
         var from = "";
@@ -626,10 +642,12 @@ class AssertionForm extends React.Component {
             let numAttributes = this.numItems(attributes);
             let lineNumberOfSelect = mappingSelectFromWhere[0].split("\n").length-1;
             let lineNumberOfFrom = mappingSelectFromWhere[1].split("\n").length-1;
+            let lineNumberOfWhere = mappingSelectFromWhere[2].split("\n").length-1;
             let startOfSelect = mappingSelectFromWhere[0].indexOf("select ");
             let lengthOfSelect = mappingSelectFromWhere[0].length;
             let lengthOfFrom = mappingSelectFromWhere[1].length;
-            let lineOfStartQuery = this.howManyLinesInCodemirror(doc) - lineNumberOfSelect - lineNumberOfFrom - 1;
+            let lengthOfWhere = mappingSelectFromWhere[2].length;
+            let lineOfStartQuery = this.howManyLinesInCodemirror(doc) - lineNumberOfSelect - lineNumberOfFrom - lineNumberOfWhere - 1;
             let lineOfStartFrom = lineOfStartQuery + lineNumberOfSelect;
             if(numAttributes === 0){
                 this.codeMirrorMarkTextFromLineToLine(doc , 0 , this.howManyLinesInCodemirror(doc) - 1);
@@ -637,8 +655,6 @@ class AssertionForm extends React.Component {
             else{
                 attributes = attributes.split(",");
                 if(attributes.every(this.haveAlias)){
-                    //controlla se ci sono più as
-                    //splitta i cazzo di attributi con as DIO DIO DIO
                     if(!attributes.every(this.existSpace)){
                         this.correctSpaceSelect(doc , lineOfStartQuery , lineNumberOfSelect , attributes , numAttributes , startOfSelect);
                     }
@@ -649,9 +665,6 @@ class AssertionForm extends React.Component {
                         }
                         else{
                             views = views.split(",");
-                            // if(!views.every(this.existSpace)){
-                            //     // alert("error nella from");
-                            // }
                             if(!views.every(this.existView)){
                                 this.correctView(doc , lineOfStartFrom , lineNumberOfFrom , lengthOfFrom , views , numViews , lineOfStartQuery , lengthOfSelect , lineNumberOfSelect);
                             }
@@ -660,7 +673,7 @@ class AssertionForm extends React.Component {
                                 let wrongAttributes = [];
                                 for(let i = 0; i < numAttributes; i++){
                                     for(let j = 0; j < numViews ; j++){
-                                        if(this.existAttributeInView(attributes[i].split(" as ")[0].trim() , views[j].trim())){
+                                        if(this.existAttributeInView(attributes[i].split(" as ")[0].trim() , views[j].trim() , views)){
                                             rightAttributes.push(attributes[i]);
                                             break;
                                         }
@@ -670,7 +683,6 @@ class AssertionForm extends React.Component {
                                     }
                                 }
                                 let temp = wrongAttributes.length;
-                                //check if numwrongattributes === 0
                                 for(let i = 0 ; i < temp ; i++){
                                     if(rightAttributes.includes(wrongAttributes[i])){
                                         wrongAttributes.splice(i , 1);
@@ -680,13 +692,25 @@ class AssertionForm extends React.Component {
                                 for(let i = 0 ; i < numWrongAttributes ; i++){
                                     this.codeMirrorWrongAttributes(doc , attributes , numAttributes , wrongAttributes[i] , lineOfStartQuery , lineNumberOfSelect , startOfSelect ,  lineOfStartFrom);
                                 }
+                                if(lengthOfWhere !== 0){
+                                    let conditions = mappingSelectFromWhere[2].split("where ")[1];
+                                    let numConditions = this.numItems(conditions);
+                                    if(numConditions === 0){
+                                        this.codeMirrorMarkTextFromLineToLine(doc , 0 , this.howManyLinesInCodemirror(doc) - 1);
+                                    }
+                                    else{
+                                        conditions = conditions.split(",");
+                                        if(!conditions.every(this.existCondition)){
+                                            this.codeMirrorMarkTextFromLineToLine(doc , 0 , this.howManyLinesInCodemirror(doc) - 1);
+                                        }
+                                    }
+                                }
                                 if(numWrongAttributes === 0){
                                     let numRightAttribute = rightAttributes.length;
                                     for(let i = 0 ; i < numRightAttribute ; i++){
                                         rightAttributes[i] = rightAttributes[i].split(" as ")[1].trim();
                                     }
                                     this.setState({mappingAttribute: rightAttributes});
-                                    // alert(this.state.mappingAttribute)
                                 }
                             }
                         }
@@ -716,76 +740,10 @@ class AssertionForm extends React.Component {
     } 
 
     onChange = (value)=>{
-        // var cursor = doc.getCursor()//['line']
-        // var line = doc.getLine(cursor.line)
-        
-        // console.log(cursor);
-        // console.log(line);
-        // console.log(doc);
-
         value = value.toLowerCase();
         var mappingSelectFromWhere = this.optimizeMappingBody(value , "mapping");
         this.analyzeMapping(mappingSelectFromWhere);
     }
-
-  getAutoComplete = dbResult => {
-    var tab = dbResult;
-    var numElements = tab["tables"].length;
-    var retDict = [];
-    for (var i = 0; i < numElements; i++) {
-      var tableName = tab["tables"][i]["name"];
-      var listAttributes = tab["tables"][i]["attributes"];
-      var numAttributesInTable = listAttributes.length;
-      retDict.push({ text: tableName, displayText: tableName }); // name:nometabella,
-
-      for (var j = 0; j < numAttributesInTable; j++) {
-        retDict.push({
-          text: listAttributes[j],
-          displayText: "(Attributo di " + tableName + ")"
-        }); // name:nometabella,
-      }
-    }
-
-    var sqlList = [
-      "ALTER",
-      "AND",
-      "AS",
-      "ASC",
-      "BETWEEN",
-      "BY",
-      "COUNT",
-      "CREATE",
-      "DELETE",
-      "DESC",
-      "DISTINCT",
-      "DROP",
-      "FROM",
-      "GROUP",
-      "HAVING",
-      "IN",
-      "INSERT",
-      "INTO",
-      "IS",
-      "JOIN",
-      "LIKE",
-      "NOT",
-      "ON",
-      "OR",
-      "ORDER",
-      "SELECT",
-      "SET",
-      "TABLE",
-      "UNION",
-      "UPDATE",
-      "VALUES",
-      "WHERE",
-      "LIMIT"
-    ];
-    for (var k = 0; k < sqlList.length; k++)
-      retDict.push({ text: sqlList[k], displayText: sqlList[k] });
-
-    this.setState({ tables: retDict });
-  };
 
   autoComplete = cm => {
     const codeMirror = this.refs["CodeMirror"].getCodeMirrorInstance();
