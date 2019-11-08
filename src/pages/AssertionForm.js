@@ -29,18 +29,18 @@ class AssertionForm extends React.Component {
     rangeInState: "",
     mappingAttribute: [],
     predicates: [
-      ">",
       ">=",
-      "<",
-      "=<",
-      "=",
+      "<=",
       "<>",
+      ">",
+      "<",
+      "=",
       "IS NULL",
       "IS NOT NULL",
       "NOT IN",
       "BETWEEN",
-      "LIKE",
-      "NOT LIKE"
+      "NOT LIKE",
+      "LIKE"
     ],
   };
 
@@ -97,18 +97,18 @@ class AssertionForm extends React.Component {
       retDict.push({ text: sqlList[j], displayText: sqlList[j] });
 
     var sqlListText = [
-      "GREATER THAN",
       "GREATER EQUAL THAN",
-      "LESS THAN",
       "LESS EQUAL THAN",
-      "EQUALS",
       "NOT EQUALS",
+      "GREATER THAN",
+      "LESS THAN",
+      "EQUALS",
       "IS NULL",
       "IS NOT NULL",
       "NOT IN",
       "BETWEEN",
-      "LIKE",
-      "NOT LIKE"
+      "NOT LIKE",
+      "LIKE"
     ];
     for (var k = 0; k < this.state.predicates.length; k++)
       retDict.push({ text: this.state.predicates[k], displayText: sqlListText[k] });
@@ -434,27 +434,7 @@ class AssertionForm extends React.Component {
         }
     }
 
-    existAttributeInView = (attribute , view , views) =>{
-        let tempAttribute;
-        if(attribute.includes(".")){
-            tempAttribute = attribute.split(".");
-            if(this.existView(tempAttribute[0])){
-                if(views.includes(tempAttribute[0])){
-                    if(!this.existAttributeInView(tempAttribute[1] , tempAttribute[0])){
-                        return false;
-                    }
-                    else{
-                        attribute = tempAttribute[1];
-                    }
-                }
-                else{
-                    return false;
-                }
-            }
-            else{
-                return false;
-            }
-        }
+    existAttributeInView = (attribute , view) =>{
         let temp = this.optimizeMappingBody(this.state.mappingViews.filter(v => v.sqlViewID === view)[0].sqlViewCode.toLowerCase() , "view")[0].split("select ")[1];
         let tempNum = this.numItems(temp);
         temp = temp.split(",");
@@ -633,6 +613,164 @@ class AssertionForm extends React.Component {
         }
     }
 
+    realCorrectView = (viewList) =>{
+    	let numberOfJoin = viewList.split(")").length-1;
+    	let listOfJoinOn = viewList.split(")");
+    	let listOfViewAlias = [];
+    	let listOfCondition = [];
+    	for(let i = 0 ; i < numberOfJoin ; i++){
+    		let temp1 = listOfJoinOn[i].split(/\son\(|\son\s/).length-1;
+    		if(temp1 > 1){
+    			return null;
+    		}
+    		else{
+    			if(listOfJoinOn[i].includes(" join ")){
+	    			if(i === 0){
+	    				listOfViewAlias.push(listOfJoinOn[i].split(" join ")[0]);
+	    				listOfViewAlias.push(listOfJoinOn[i].split(" join ")[1].split(/\son\(|\son\s/)[0]);
+	    			}
+	    			else{
+	    				listOfViewAlias.push(listOfJoinOn[i].split(/\son\(|\son\s/)[0].split(" join ")[1]);
+	    			}
+	    			listOfCondition.push(listOfJoinOn[i].split(/\son\(|\son\s*\(/)[1]);
+	    			if(typeof listOfCondition[i] === 'undefined'){
+	    				return null;
+	    			}
+	    		}
+	    		else{
+	    			return null;
+	    		}
+    		}
+    	}
+    	let numberOfView = listOfViewAlias.length;
+    	let numberOfCondition = listOfCondition.length;
+    	let views = [];
+    	let aliases = [];
+    	let conditions = [];
+    	if(numberOfCondition !== numberOfView-1){
+    		return null;
+    	}
+    	for(let i = 0 ; i < numberOfView ; i++){
+    		if(!listOfViewAlias[i].includes(" as ")){
+    			return null;
+    		}
+    		else{
+    			views.push(listOfViewAlias[i].split(" as ")[0].trim());
+    			if(aliases.includes(listOfViewAlias[i].split(" as ")[1].trim())){
+    				return null;
+    			}
+    			else{
+    				aliases.push(listOfViewAlias[i].split(" as ")[1].trim());
+    			}
+    		}
+    	}
+    	for(let i = 0 ; i < numberOfCondition ; i++){
+    		if(!listOfCondition[i].includes("=") || (listOfCondition[i].split("=").length !== 2)){
+    			return null;
+    		}
+    		else{
+    			conditions.push([listOfCondition[i].split("=")[0].trim(),listOfCondition[i].split("=")[1].trim()]);
+    			if(!conditions[i][0].includes(".") || !conditions[i][1].includes(".")){
+    				return null;
+    			}
+    		}
+    	}
+    	return [views , aliases , conditions];
+    }
+
+    correctFrom = (views , aliases , conditions) =>{
+    	let numConditions = conditions.length;
+    	for(let i = 0 ; i < numConditions ; i++){
+    		let tempAlias1 = conditions[i][0].split(".")[0].trim();
+    		let tempAttr1 = conditions[i][0].split(".")[1].trim();
+    		let tempAlias2 = conditions[i][1].split(".")[0].trim();
+    		let tempAttr2 = conditions[i][1].split(".")[1].trim();
+    		if(!aliases.includes(tempAlias1) || !aliases.includes(tempAlias2)){
+    			return false;
+    		}
+    		else{
+    			if(i === 0){
+    				if(tempAlias1 === aliases[0] && tempAlias2 === aliases[1]){
+    					if(!this.existAttributeInView(tempAttr1 , views[0]) || !this.existAttributeInView(tempAttr2 , views[1])){
+    						return false;
+    					}	
+    				}
+    				else if(tempAlias1 === aliases[1] && tempAlias2 === aliases[0]){
+    					if(!this.existAttributeInView(tempAttr1 , views[1]) || !this.existAttributeInView(tempAttr2 , views[0])){
+    						return false;
+    					}	
+    				}
+    				else{
+    					return false;
+    				}
+    			}
+    			else{
+    				if(tempAlias1 === aliases[i+1] && this.existAttributeInView(tempAttr1 , views[i+1])){
+    					for(let j = 0 ; j <= i ; j++){
+    						if(tempAlias2 === aliases[j]){
+    							if(!this.existAttributeInView(tempAttr2 , views[j])){
+    								return false;
+    							}
+    							else{
+    								break;
+    							}
+    						}
+    						else{
+    							if(j+1 > i){
+    								return false;
+    							}
+    						}
+    					}
+    				}
+    				else if(tempAlias2 === aliases[i+1] && this.existAttributeInView(tempAttr2 , views[i+1])){
+    					for(let j = 0 ; j <= i ; j++){
+    						if(tempAlias1 === aliases[j]){
+    							if(!this.existAttributeInView(tempAttr1 , views[j])){
+    								return false;
+       							}
+    							else{
+    								break;
+    							}
+    						}
+    						else{
+    							if(j+1 > i){
+    								return false;
+    							}
+    						}
+    					}
+    				}
+    				else{
+    					return false;
+    				}
+    			}
+    		}
+    	}
+    	return true;
+    }
+    correctWhere = (conditionsOfWhere , numConditionsOfWhere) =>{
+    	let numPredicates = this.state.predicates.length;
+    	let realPredicates = [];
+    	let staticVariables = [];
+    	let variableVariables = [];
+    	let wrongCondition = [];
+    	for(let i = 0 ; i < numConditionsOfWhere ; i++){
+    		for(let j = 0 ; j < numPredicates ; j++ ){
+    			let temp = conditionsOfWhere[i].match(/>=|<=|<>|>|<|=|\sis\s+null\s|\sis\s+not\s+null\s|\snot\s+in\s|\sbetween\s|\snot\s+like\s|\slike\s/);
+				if(temp){
+					realPredicates.push(temp);
+					variableVariables.push(conditionsOfWhere[i].split(temp)[0]);
+					staticVariables.push(conditionsOfWhere[i].split(temp)[0]);
+					break;
+				}
+				else if(j+1 === numPredicates){
+					wrongCondition.push(conditionsOfWhere[i]);
+				}
+    		}
+    	}
+    	alert(realPredicates)
+    	return [variableVariables , realPredicates , staticVariables , wrongCondition];
+    }
+
     analyzeMapping = (mappingSelectFromWhere) =>{
         var editor = document.querySelector(".CodeMirror").CodeMirror
         var doc = editor.getDoc()
@@ -664,55 +802,125 @@ class AssertionForm extends React.Component {
                             this.codeMirrorMarkTextFromLineToLine(doc , 0 , this.howManyLinesInCodemirror(doc) - 1);
                         }
                         else{
-                            views = views.split(",");
-                            if(!views.every(this.existView)){
-                                this.correctView(doc , lineOfStartFrom , lineNumberOfFrom , lengthOfFrom , views , numViews , lineOfStartQuery , lengthOfSelect , lineNumberOfSelect);
-                            }
-                            else{
-                                let rightAttributes = [];
-                                let wrongAttributes = [];
-                                for(let i = 0; i < numAttributes; i++){
-                                    for(let j = 0; j < numViews ; j++){
-                                        if(this.existAttributeInView(attributes[i].split(" as ")[0].trim() , views[j].trim() , views)){
-                                            rightAttributes.push(attributes[i]);
-                                            break;
-                                        }
-                                        else{
-                                            wrongAttributes.push(attributes[i]);
-                                        }
-                                    }
-                                }
-                                let temp = wrongAttributes.length;
-                                for(let i = 0 ; i < temp ; i++){
-                                    if(rightAttributes.includes(wrongAttributes[i])){
-                                        wrongAttributes.splice(i , 1);
-                                    }
-                                }
-                                let numWrongAttributes = wrongAttributes.length;
-                                for(let i = 0 ; i < numWrongAttributes ; i++){
-                                    this.codeMirrorWrongAttributes(doc , attributes , numAttributes , wrongAttributes[i] , lineOfStartQuery , lineNumberOfSelect , startOfSelect ,  lineOfStartFrom);
-                                }
-                                if(lengthOfWhere !== 0){
-                                    let conditions = mappingSelectFromWhere[2].split("where ")[1];
-                                    let numConditions = this.numItems(conditions);
-                                    if(numConditions === 0){
-                                        this.codeMirrorMarkTextFromLineToLine(doc , 0 , this.howManyLinesInCodemirror(doc) - 1);
-                                    }
-                                    else{
-                                        conditions = conditions.split(",");
-                                        if(!conditions.every(this.existCondition)){
-                                            this.codeMirrorMarkTextFromLineToLine(doc , 0 , this.howManyLinesInCodemirror(doc) - 1);
-                                        }
-                                    }
-                                }
-                                if(numWrongAttributes === 0){
-                                    let numRightAttribute = rightAttributes.length;
-                                    for(let i = 0 ; i < numRightAttribute ; i++){
-                                        rightAttributes[i] = rightAttributes[i].split(" as ")[1].trim();
-                                    }
-                                    this.setState({mappingAttribute: rightAttributes});
-                                }
-                            }
+                        	let tempFrom = this.realCorrectView(views);
+                        	if(tempFrom === null){
+                        		this.codeMirrorMarkTextFromLineToLine(doc , lineOfStartFrom , this.howManyLinesInCodemirror(doc) - 1);
+                        	}
+                        	else{
+                        		let conditions = tempFrom[2];
+	                        	views = tempFrom[0];
+	                        	let aliases = tempFrom[1];
+	                            if(!views.every(this.existView)){
+	                                // this.correctView(doc , lineOfStartFrom , lineNumberOfFrom , lengthOfFrom , views , numViews , lineOfStartQuery , lengthOfSelect , lineNumberOfSelect);
+	                            }
+	                            else{
+	                            	if(!this.correctFrom(views , aliases , conditions)){
+	                            		// alert("sbagliata");
+	                            	}
+	                            	else{
+	                            		numViews = views.length;
+	                            		let rightAttributes = [];
+                                		let wrongAttributes = [];
+                                		for(let i = 0; i < numAttributes; i++){
+                    						let tempAttribute = attributes[i].split(" as ")[0].trim();
+                                    		if(tempAttribute.includes(".")){
+                                    			let tempView = tempAttribute.split(".")[0].trim();
+                                    			let tempAttr = tempAttribute.split(".")[1].trim();
+                                    			if(views.includes(tempView)){
+                                    				if(this.existAttributeInView(tempAttr , tempView)){
+                                    					rightAttributes.push(attributes[i]);
+                                    				}
+                                    				else{
+                                    					wrongAttributes.push(attributes[i]);
+                                    				}
+                                    			}
+                                    			else if(aliases.includes(tempView)){
+                                    				let index = aliases.indexOf(tempView);
+                                    				if(this.existAttributeInView(tempAttr , views[index])){
+                                    					rightAttributes.push(attributes[i]);
+                                    				}
+                                    				else{
+                                    					wrongAttributes.push(attributes[i]);
+                                    				}
+                                    			}
+                                    			else{
+                                    				wrongAttributes.push(attributes[i]);
+                                    			}
+                                    		}
+                                    		else{
+                                    			wrongAttributes.push(attributes[i]);
+                                    		}
+                                		}
+		                                let numWrongAttributes = wrongAttributes.length;
+		                                for(let i = 0 ; i < numWrongAttributes ; i++){
+		                                    this.codeMirrorWrongAttributes(doc , attributes , numAttributes , wrongAttributes[i] , lineOfStartQuery , lineNumberOfSelect , startOfSelect ,  lineOfStartFrom);
+		                                }
+		 							    if(lengthOfWhere !== 0){
+		                                    let conditionsOfWhere = mappingSelectFromWhere[2].split("where ")[1];
+		                                    let numConditionsOfWhere = conditionsOfWhere.split(" and ").length;
+		                                    if(numConditionsOfWhere === 0){
+		                                        this.codeMirrorMarkTextFromLineToLine(doc , 0 , this.howManyLinesInCodemirror(doc) - 1);
+		                                    }
+		                                    else{
+		                                        conditionsOfWhere = conditionsOfWhere.split(" and ");
+		                                        let tempWhere = this.correctWhere(conditionsOfWhere , numConditionsOfWhere);
+		                                        if(typeof tempWhere[3][0] === 'undefined'){
+		                                        	let rightPredicates = [];
+		                                        	let wrongPredicates = [];
+		                                        	for(let i = 0 ; i < tempWhere[0].length ; i++){
+		                                        		if(tempWhere[0][i].includes(".")){
+		                                        			let tempView = tempWhere[0][i].split(".")[0].trim();
+		                                        			let tempAttr = tempWhere[0][i].split(".")[1].trim();
+		                                        			if(views.includes(tempView)){
+		                                        				if(this.existAttributeInView(tempAttr , tempView)){
+		                                        					rightPredicates.push(tempWhere[0][i]);
+		                                        				}
+		                                        				else{
+		                                        					wrongPredicates.push(tempWhere[0][i]);		
+		                                        				}
+		                                        			}
+		                                        			else if(aliases.includes(tempView)){
+		                                        				let index = aliases.indexOf(tempView);
+			                                    				if(this.existAttributeInView(tempAttr , views[index])){
+			                                    					rightPredicates.push(tempWhere[0][i]);
+			                                    				}
+			                                    				else{
+			                                    					wrongPredicates.push(tempWhere[0][i]);
+			                                    				}
+		                                        			}
+		                                        		}
+		                                        		else{
+		                                        			wrongPredicates.push(tempWhere[0][i]);
+		                                        		}
+		                                        	}
+		                                			if(typeof wrongPredicates[0] === 'undefined' && numWrongAttributes === 0){
+		                                				let numRightAttribute = rightAttributes.length;
+					                                    for(let i = 0 ; i < numRightAttribute ; i++){
+					                                        rightAttributes[i] = rightAttributes[i].split(" as ")[1].trim();
+					                                    }
+					                                    this.setState({mappingAttribute: rightAttributes});
+		                                			}
+		                                			else{
+		                                				// alert("error");
+		                                			}
+		                                        }
+		                                        else{
+		                                			// alert("error predicates");		                                			
+		                                        }
+		                                    }
+		                                }
+		                                else{
+			                                if(numWrongAttributes === 0){
+			                                    let numRightAttribute = rightAttributes.length;
+			                                    for(let i = 0 ; i < numRightAttribute ; i++){
+			                                        rightAttributes[i] = rightAttributes[i].split(" as ")[1].trim();
+			                                    }
+			                                    this.setState({mappingAttribute: rightAttributes});
+			                                }
+			                            }
+	                            	}
+	                            }
+                        	} 
                         }
                     }
                 }
